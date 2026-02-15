@@ -33,11 +33,14 @@ AI Retail Decision Intelligence Platform - A modern, data-driven decision suppor
 - **FR3.8**: Apply color-coded risk highlighting (red for CRITICAL, orange for HIGH, green for LOW)
 - **FR3.9**: Support product search/filtering in decision table
 
-### 4. Demand Prediction
-- **FR4.1**: Calculate predicted demand using 7-day rolling average per product group
-- **FR4.2**: Use predicted demand for decision-making logic
-- **FR4.3**: Handle edge cases with minimum periods for rolling calculations
-- **FR4.4**: Apply groupby transformation for accurate product-level predictions
+### 4. ML-Based Demand Prediction
+- **FR4.1**: Use Random Forest Regressor for demand prediction
+- **FR4.2**: Extract temporal features from Date column (Day, Month, Year)
+- **FR4.3**: Use feature set: Current_Stock, Price, Competitor_Price, Day, Month
+- **FR4.4**: Train model with 100 estimators and random_state=42
+- **FR4.5**: Generate predicted demand for all products
+- **FR4.6**: Handle missing Date column with default values (2024-01-01)
+- **FR4.7**: Use predicted demand for decision-making logic
 
 ### 5. AI Copilot
 - **FR5.1**: Accept natural language questions from users
@@ -94,10 +97,11 @@ AI Retail Decision Intelligence Platform - A modern, data-driven decision suppor
 - **TR1.1**: Python 3.8+ as primary programming language
 - **TR1.2**: Streamlit for web interface
 - **TR1.3**: Pandas for data manipulation
-- **TR1.4**: Scikit-learn for machine learning capabilities
+- **TR1.4**: Scikit-learn for machine learning (Random Forest Regressor)
 - **TR1.5**: Groq API for LLM integration
 - **TR1.6**: Matplotlib for custom visualizations
 - **TR1.7**: Altair for advanced charting (optional)
+- **TR1.8**: NumPy for numerical operations
 
 ### 2. Data Format
 - **TR2.1**: Input format: CSV files
@@ -162,13 +166,16 @@ AI Retail Decision Intelligence Platform - A modern, data-driven decision suppor
 - **C1**: Requires active internet connection for AI features
 - **C2**: Requires valid Groq API key
 - **C3**: Limited to CSV file format for data input
-- **C4**: Demand prediction requires minimum 7 data points for accuracy
+- **C4**: ML model requires sufficient training data for accurate predictions
 - **C5**: Context limited to 100 rows for AI copilot queries
+- **C6**: Date column is optional but recommended for better predictions
 
 ## Future Enhancements
 - Multi-file upload support
 - Database integration for persistent storage
-- Advanced ML models for demand forecasting (LSTM, Prophet)
+- Advanced ML models for demand forecasting (LSTM, Prophet, XGBoost)
+- Model performance metrics and validation
+- Hyperparameter tuning for Random Forest
 - Real-time data synchronization
 - Export functionality for decisions and insights (PDF, Excel)
 - User authentication and multi-tenant support
@@ -178,3 +185,5 @@ AI Retail Decision Intelligence Platform - A modern, data-driven decision suppor
 - Historical trend analysis and forecasting
 - Customizable decision thresholds
 - Multi-language support
+- Model retraining and versioning
+- Feature importance visualization

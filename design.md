@@ -40,7 +40,7 @@
 ### 1. Main Application (app.py)
 
 #### Purpose
-Central orchestrator with enhanced UI/UX and improved decision logic.
+Central orchestrator with enhanced UI/UX, ML-based demand prediction, and improved decision logic.
 
 #### Key Enhancements
 - Compact header with inline import box
@@ -49,6 +49,23 @@ Central orchestrator with enhanced UI/UX and improved decision logic.
 - Searchable decision table
 - Dynamic priority scoring
 - Dark-themed visualizations
+- **Machine Learning-based demand forecasting**
+
+#### ML Demand Prediction Pipeline
+```python
+1. Feature Engineering:
+   - Extract temporal features (Day, Month, Year) from Date
+   - Use features: Current_Stock, Price, Competitor_Price, Day, Month
+   
+2. Model Training:
+   - Algorithm: Random Forest Regressor
+   - Parameters: n_estimators=100, random_state=42
+   - Target: Units_Sold
+   
+3. Prediction:
+   - Generate Predicted_Demand for all products
+   - Use predictions in decision engine
+```
 
 #### Layout Structure
 ```python
@@ -74,9 +91,60 @@ Tabs
 
 #### Data Flow
 1. User uploads CSV → Validation → Session storage
-2. Demand prediction via groupby + rolling average
+2. **ML-based demand prediction:**
+   - Extract temporal features from Date column
+   - Train Random Forest Regressor on historical data
+   - Generate Predicted_Demand column
 3. Route to tabs with persistent session state
 4. Generate decisions/insights on-demand
+
+## Machine Learning Architecture
+
+### Demand Prediction Model
+
+#### Algorithm: Random Forest Regressor
+```python
+from sklearn.ensemble import RandomForestRegressor
+
+model = RandomForestRegressor(
+    n_estimators=100,
+    random_state=42
+)
+```
+
+#### Feature Engineering
+```python
+Features (X):
+- Current_Stock: integer
+- Price: float
+- Competitor_Price: float
+- Day: integer (1-31)
+- Month: integer (1-12)
+
+Target (y):
+- Units_Sold: integer
+```
+
+#### Training Process
+1. Check if Date column exists
+2. Extract temporal features (Day, Month, Year)
+3. If no Date column, use defaults (Day=1, Month=1, Year=2024)
+4. Prepare feature matrix X and target vector y
+5. Train Random Forest model
+6. Generate predictions for all rows
+7. Store as Predicted_Demand column
+
+#### Model Characteristics
+- **Ensemble Method**: Combines 100 decision trees
+- **Non-parametric**: Captures non-linear relationships
+- **Feature Importance**: Can identify key demand drivers
+- **Robustness**: Handles missing values and outliers well
+
+#### Advantages Over Rolling Average
+- Considers multiple factors (price, stock, time)
+- Captures complex patterns and interactions
+- More accurate for products with irregular demand
+- Adapts to seasonal and temporal trends
 
 ### 2. Enhanced Decision Engine
 
@@ -199,9 +267,17 @@ Date: datetime (optional)
 
 ### Derived Fields
 ```python
-Predicted_Demand = groupby("Product")["Units_Sold"]
-                   .transform(lambda x: x.rolling(7, min_periods=1).mean())
+# Temporal Features (if Date column exists)
+Day = Date.dt.day
+Month = Date.dt.month
+Year = Date.dt.year
 
+# ML-based Prediction
+Predicted_Demand = RandomForestRegressor.predict([
+    Current_Stock, Price, Competitor_Price, Day, Month
+])
+
+# Decision Metrics
 gap = Current_Stock - Predicted_Demand
 gap_ratio = abs(gap) / (Predicted_Demand + 1)
 ```
@@ -422,6 +498,12 @@ groq
 altair (optional)
 ```
 
+### ML Model Considerations
+- Model is trained on-the-fly with each data upload
+- No model persistence between sessions
+- Training time scales with dataset size
+- Consider caching for large datasets
+
 ## Future Design Enhancements
 
 ### UI/UX Improvements
@@ -437,7 +519,11 @@ altair (optional)
 - User authentication
 - Multi-tenant support
 - Advanced filtering and drill-downs
-- Predictive analytics (LSTM, Prophet)
+- **Model persistence and versioning**
+- **Feature importance visualization**
+- **Model performance metrics (RMSE, MAE, R²)**
+- **Hyperparameter tuning interface**
+- **Ensemble model comparison (RF vs XGBoost vs LSTM)**
 - Email/SMS alerts
 - API endpoints for integration
 
@@ -454,12 +540,22 @@ altair (optional)
 - Decision logic validation
 - Data transformation accuracy
 - API integration mocking
+- **ML model prediction accuracy**
+- **Feature engineering correctness**
 
 ### Integration Tests
 - End-to-end workflow
 - File upload and processing
 - Tab navigation
 - Search functionality
+- **ML model training pipeline**
+
+### Model Validation
+- Train/test split evaluation
+- Cross-validation scores
+- Feature importance analysis
+- Prediction error distribution
+- Edge case handling (missing dates, outliers)
 
 ### UI Tests
 - Layout responsiveness
